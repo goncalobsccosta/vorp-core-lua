@@ -367,6 +367,7 @@ RegisterCommand("healplayer", function(source, args, rawCommand)
     local _source = source
 
     TriggerEvent("vorp:getCharacter", _source, function(user)
+        local id = args[1]
         local playerId = tonumber(args[1])
         local Identifier = GetPlayerIdentifier(_source)
         local targetIdentifier = GetPlayerIdentifier(id)
