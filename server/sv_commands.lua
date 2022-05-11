@@ -15,11 +15,15 @@ RegisterCommand("setgroup", function(source, args, rawCommand)
             if user.group == Config.Group.Admin or user.group == Config.Group.Mod then
                 local target, newgroup = args[1], args[2]
                 local Identifier = GetPlayerIdentifier(_source)
+                local targetIdentifier = GetPlayerIdentifier(target)
                 local discordIdentity = GetIdentity(_source, "discord")
                 local discordId = string.sub(discordIdentity, 9)
+                local targetdiscordIdentity = GetIdentity(target, "discord")
+                local targetdiscordId = string.sub(targetdiscordIdentity, 9)
                 local ip = GetPlayerEndpoint(_source)
                 local steamName = GetPlayerName(_source)
-                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "`\n**PlayerID** `" .. target .. "` \n**Group given** `" .. newgroup .. "`"
+                local targetsteamName = GetPlayerName(target)
+                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "`\n**PlayerID** `" .. target .. "` \n**Group given** `" .. newgroup .. "`"
 
                 if newgroup == nil or newgroup == '' then
                     TriggerClientEvent("vorp:Tip", _source, "ERROR: Use Correct Sintaxis", 4000)
@@ -56,11 +60,15 @@ RegisterCommand("setjob", function(source, args, rawCommand)
             if user.group == Config.Group.Admin or user.group == Config.Group.Mod then
                 local target, newjob, jobgrade = args[1], args[2], args[3]
                 local Identifier = GetPlayerIdentifier(_source)
+                local targetIdentifier = GetPlayerIdentifier(target)
                 local discordIdentity = GetIdentity(_source, "discord")
                 local discordId = string.sub(discordIdentity, 9)
+                local targetdiscordIdentity = GetIdentity(target, "discord")
+                local targetdiscordId = string.sub(targetdiscordIdentity, 9)
                 local ip = GetPlayerEndpoint(_source)
                 local steamName = GetPlayerName(_source)
-                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerID** `" .. target .. "` \n**Job given** `" .. newjob .. "`\n **Grade:** `" .. jobgrade .. "`"
+                local targetsteamName = GetPlayerName(target)
+                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerID** `" .. target .. "` \n**Job given** `" .. newjob .. "`\n **Grade:** `" .. jobgrade .. "`"
 
                 if newjob == nil or newjob == '' then
                     if jobgrade == nil or jobgrade == '' then
@@ -99,11 +107,15 @@ RegisterCommand("addmoney", function(source, args, rawCommand)
             if user.group == Config.Group.Admin or user.group == Config.Group.Mod then
                 local target, montype, quantity = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
                 local Identifier = GetPlayerIdentifier(_source)
+                local targetIdentifier = GetPlayerIdentifier(target) 
                 local discordIdentity = GetIdentity(_source, "discord")
                 local discordId = string.sub(discordIdentity, 9)
+                local targetdiscordIdentity = GetIdentity(target, "discord")
+                local targetdiscordId = string.sub(targetdiscordIdentity, 9)
                 local ip = GetPlayerEndpoint(_source)
                 local steamName = GetPlayerName(_source)
-                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "`\n**PlayerId:** `" .. target .. "` \n **Type** `" .. montype .. "` \n**Quantity** `" .. quantity .. "`"
+                local targetsteamName = GetPlayerName(target)
+                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "`\n**PlayerId:** `" .. target .. "` \n **Type** `" .. montype .. "` \n**Quantity** `" .. quantity .. "`"
 
                 TriggerEvent("vorp:addMoney", target, montype, quantity)
                 TriggerClientEvent("vorp:Tip", _source, string.format("Added %s to %s", target, quantity), 4000)
@@ -130,13 +142,17 @@ RegisterCommand("delcurrency", function(source, args, rawCommand)
 
             if user.group == Config.Group.Admin or user.group == Config.Group.Mod then
                 local target, montype, quantity = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
-
+                        
                 local Identifier = GetPlayerIdentifier(_source)
+                local targetIdentifier = GetPlayerIdentifier(target)
                 local discordIdentity = GetIdentity(_source, "discord")
                 local discordId = string.sub(discordIdentity, 9)
+                local targetdiscordIdentity = GetIdentity(target, "discord")
+                local targetdiscordId = string.sub(targetdiscordIdentity, 9)
                 local ip = GetPlayerEndpoint(_source)
                 local steamName = GetPlayerName(_source)
-                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "`\n**PlayerId:** `" .. target .. "` \n **Type** `" .. montype .. "` \n**Quantity** `" .. quantity .. "`"
+                local targetsteamName = GetPlayerName(target)
+                local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "`\n**PlayerId:** `" .. target .. "` \n **Type** `" .. montype .. "` \n**Quantity** `" .. quantity .. "`"
 
                 print(message)
                 TriggerEvent("vorp:removeMoney", target, montype, quantity)
@@ -167,11 +183,15 @@ RegisterCommand("additems", function(source, args, rawCommand)
         local item = args[2]
         local count = args[3]
         local Identifier = GetPlayerIdentifier(_source)
+        local targetIdentifier = GetPlayerIdentifier(id)
         local discordIdentity = GetIdentity(_source, "discord")
         local discordId = string.sub(discordIdentity, 9)
+        local targetdiscordIdentity = GetIdentity(id, "discord")
+        local targetdiscordId = string.sub(targetdiscordIdentity, 9)
         local ip = GetPlayerEndpoint(_source)
         local steamName = GetPlayerName(_source)
-        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerId** `" .. id .. "` \n**Item given** `" .. item .. "` \n **Count**`" .. count .. "`"
+        local targetsteamName = GetPlayerName(id)
+        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerId** `" .. id .. "` \n**Item given** `" .. item .. "` \n **Count**`" .. count .. "`"
 
         if args ~= nil then
             if user.group == Config.Group.Admin or user.group == Config.Group.Mod then
@@ -197,11 +217,15 @@ RegisterCommand("addweapons", function(source, args, rawCommand)
         local weaponHash = tostring(args[2])
 
         local Identifier = GetPlayerIdentifier(_source)
+        local targetIdentifier = GetPlayerIdentifier(id)
         local discordIdentity = GetIdentity(_source, "discord")
         local discordId = string.sub(discordIdentity, 9)
+        local targetdiscordIdentity = GetIdentity(id, "discord")
+        local targetdiscordId = string.sub(targetdiscordIdentity, 9)
         local ip = GetPlayerEndpoint(_source)
         local steamName = GetPlayerName(_source)
-        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerId** `" .. id .. "` \n**Weapon given** `" .. weaponHash .. "`"
+        local targetsteamName = GetPlayerName(id)
+        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerId** `" .. id .. "` \n**Weapon given** `" .. weaponHash .. "`"
 
         if args ~= nil then
             TriggerEvent("vorpCore:canCarryWeapons", tonumber(id), 1, function(canCarry)
@@ -232,12 +256,16 @@ RegisterCommand("reviveplayer", function(source, args)
         local id = args[1]
 
         local Identifier = GetPlayerIdentifier(_source)
+        local targetIdentifier = GetPlayerIdentifier(playerId)
         local discordIdentity = GetIdentity(_source, "discord")
         local discordId = string.sub(discordIdentity, 9)
+        local targetdiscordIdentity = GetIdentity(playerId, "discord")
+        local targetdiscordId = string.sub(targetdiscordIdentity, 9)
         local ip = GetPlayerEndpoint(_source)
         local steamName = GetPlayerName(_source)
+        local targetsteamName = GetPlayerName(playerId)
         local text = "Was Revived"
-        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerId** `" .. id .. "`\n **Action:** `" .. text .. "`"
+        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "`\n **PlayerId** `" .. id .. "`\n **Action:** `" .. text .. "`"
 
         if args ~= nil then
             if user.group == Config.Group.Admin or user.group == Config.Group.Mod then
@@ -341,13 +369,17 @@ RegisterCommand("healplayer", function(source, args, rawCommand)
     TriggerEvent("vorp:getCharacter", _source, function(user)
         local playerId = tonumber(args[1])
         local Identifier = GetPlayerIdentifier(_source)
+        local targetIdentifier = GetPlayerIdentifier(id)
         local discordIdentity = GetIdentity(_source, "discord")
         local discordId = string.sub(discordIdentity, 9)
+        local targetdiscordIdentity = GetIdentity(id, "discord")
+        local targetdiscordId = string.sub(targetdiscordIdentity, 9)
         local ip = GetPlayerEndpoint(_source)
         local steamName = GetPlayerName(_source)
+        local targetsteamName = GetPlayerName(id)
         local text = "Was healed"
-        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier**`" .. Identifier .. "` \n**Discord:** <@" .. discordId .. ">**\nIP: **`" .. ip .. "` \n **PlayerId:** `" .. playerId .. "`\n **Action:** `" .. text .. "`"
-        if args ~= nil then
+        local message = "**Steam name: **`" .. steamName .. "`**\nIdentifier: **`" .. Identifier .. "`**\nTarget Steam name: **`" .. targetsteamName .. "`**\nTarget Identifier: **`" .. targetIdentifier .. "` \n**Discord:** <@" .. discordId .. ">\n**Target Discord:** <@" .. targetdiscordId .. ">**\nIP: **`" .. ip .. "` \n **PlayerId:** `" .. playerId .. "`\n **Action:** `" .. text .. "`"
+    if args ~= nil then
             if user.group == Config.Group.Admin or user.group == Config.Group.Mod then
                 TriggerClientEvent('vorp:heal', _source, playerId)
                 TriggerEvent("vorp:healPlayerWebhook", "📋` /healplayer command` ", message, color)
