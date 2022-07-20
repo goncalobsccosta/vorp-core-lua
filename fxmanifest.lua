@@ -1,34 +1,35 @@
-game 'rdr3'
 fx_version 'adamant'
-author 'goncalobsccosta#9041'
+game 'rdr3'
 rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships.'
+
+author 'goncalobsccosta#9041'
 
 shared_scripts {
   'config.lua'
 }
 
 client_scripts {
-  'client/Notifications.js',
+  'client/Notifications.lua',
   'client/cl_*.lua',
 }
 
 server_scripts {
   'server/class/sv_*.lua',
   'server/sv_*.lua',
+  'server/services/*.lua',
+  'server/services/dbupdater/*.lua'
 }
 
-server_exports {'vorpAPI'}
+server_exports { 'vorpAPI' }
 
 files {
-  'ui/hud.html',
-  'ui/js/progressbar.js',
-  'ui/js/progressbar.min.js',
-  'ui/js/progressbar.min.js.map',
-  'ui/hud.html',
-  'ui/css/style.css',
-  'ui/fonts/rdrlino-regular-webfont.woff',
-  'ui/icons/gold_2.png',
-  'ui/icons/token.png',
+  'ui/**/*'
 }
 
 ui_page 'ui/hud.html'
+
+--dont touch
+version '1.4'
+vorp_checker 'yes'
+vorp_name '^4Resource version Check^3 '
+vorp_github 'https://github.com/VORPCORE/vorp-core-lua'

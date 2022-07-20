@@ -1,5 +1,3 @@
-local commandSuggestions = {}
-
 AddEventHandler('vorp:getCharacter', function(player, cb)
     local sid = GetSteamID(player)
 
@@ -44,11 +42,12 @@ AddEventHandler('vorp:removeXp', function(player, quantity)
     end
 end)
 
-AddEventHandler('vorp:setJob', function(player, job)
+AddEventHandler('vorp:setJob', function(player, job, jobgrade)
     local sid = GetSteamID(player)
 
     if _users[sid] ~= nil then
         _users[sid].GetUsedCharacter().setJob(job)
+        _users[sid].GetUsedCharacter().setJobGrade(jobgrade)
     end
 end)
 
@@ -60,12 +59,20 @@ AddEventHandler('vorp:setGroup', function(player, group)
     end
 end)
 
+AddEventHandler('vorp:whitelistPlayer', function(id)
+    AddUserToWhitelistById(id)
+end)
+
+AddEventHandler('vorp:unwhitelistPlayer', function(id)
+    RemoveUserFromWhitelistById(id)
+end)
+
 AddEventHandler('getCore', function(cb)
     local coreData = {}
 
     coreData.getUser = function(source)
         if source == nil then return nil end
-            
+
         local sid = GetSteamID(source)
 
         if _users[sid] then
@@ -87,22 +94,123 @@ AddEventHandler('getCore', function(cb)
         return _users
     end
 
-    coreData.sendLog = function(msg, type)
-        --Nothing
+    coreData.Warning = function(text)
+        print("^3WARNING: ^7" .. tostring(text) .. "^7")
     end
-    
+
+    coreData.Error = function(text)
+        print("^1ERROR: ^7" .. tostring(text) .. "^7")
+        TriggerClientEvent("vorp_core:LogError")
+    end
+
+    coreData.Success = function(text)
+        print("^2SUCCESS: ^7" .. tostring(text) .. "^7")
+    end
+
+    coreData.NotifyTip = function(source, text, duration)
+        local _source = source
+        TriggerClientEvent('vorp:Tip', _source, text, duration)
+    end
+
+    coreData.NotifyLeft = function(source, title, subtitle, dict, icon, duration, colors)
+        local _source = source
+        TriggerClientEvent('vorp:NotifyLeft', _source, title, subtitle, dict, icon, duration, colors)
+    end
+
+    coreData.NotifyRightTip = function(source, text, duration)
+        local _source = source
+        TriggerClientEvent('vorp:TipRight', _source, text, duration)
+    end
+
+    coreData.NotifyObjective = function(source, text, duration)
+        local _source = source
+        TriggerClientEvent('vorp:TipBottom', _source, text, duration)
+    end
+
+    coreData.NotifyTop = function(source, text, location, duration)
+        local _source = source
+        TriggerClientEvent('vorp:NotifyTop', _source, text, location, duration)
+    end
+
+    coreData.NotifySimpleTop = function(source, text, subtitle, duration)
+        local _source = source
+        TriggerClientEvent('vorp:ShowTopNotification', _source, text, subtitle, duration)
+    end
+
+    coreData.NotifyAvanced = function(source, text, dict, icon, text_color, duration)
+        local _source = source
+        TriggerClientEvent('vorp:ShowAdvancedRightNotification', _source, text, dict, icon, text_color, duration)
+    end
+
+    coreData.NotifyCenter = function(source, text, duration, color)
+        local _source = source
+        TriggerClientEvent('vorp:ShowSimpleCenterText', _source, text, duration, color)
+    end
+
+    coreData.NotifyBottomRight = function(source, text, duration)
+        local _source = source
+        TriggerClientEvent('vorp:ShowBottomRight', _source, text, duration)
+    end
+
+    coreData.NotifyFail = function(source, text, subtitle, duration)
+        local _source = source
+        TriggerClientEvent('vorp:failmissioNotifY', _source, text, subtitle, duration)
+    end
+
+    coreData.NotifyDead = function(source, title, audioRef, audioName, duration)
+        local _source = source
+        TriggerClientEvent('vorp:deadplayerNotifY', _source, title, audioRef, audioName, duration)
+    end
+
+    coreData.NotifyUpdate = function(source, title, subtitle, duration)
+        local _source = source
+        TriggerClientEvent('vorp:updatemissioNotify', title, subtitle, duration)
+    end
+
+    coreData.NotifyWarning = function(source, title, msg, audioRef, audioName, duration)
+        local _source = source
+        TriggerClientEvent('vorp:warningNotify', _source, title, msg, audioRef, audioName, duration)
+    end
+
+    coreData.dbUpdateAddTables = function(tbl)
+        if VorpInitialized == true then
+            print('Updates must be added before vorpcore is initiates')
+        end
+        dbupdaterAPI.addTables(tbl)
+    end
+
+    coreData.dbUpdateAddUpdates = function(updt)
+        if VorpInitialized == true then
+            print('Updates must be added before vorpcore is initiates')
+        end
+        dbupdaterAPI.addUpdates(updt)
+    end
+
+    coreData.AddWebhook = function(title, webhook, description, color, name, logo, footerlogo, avatar)
+        TriggerEvent('vorp_core:addWebhook', title, webhook, description, color, name, logo, footerlogo, avatar)
+    end
+
     cb(coreData)
 end)
 
-AddEventHandler('vorp:addSuggestion', function(commandName, suggestion)
-    table.insert(commandSuggestions, {
-        name = commandName,
-        help = suggestion
-    })
-end)
+AddEventHandler('getWhitelistTables', function(cb)
+    local whitelistData = {}
 
-RegisterNetEvent('chat:init', function()
-    local source = source
-    Citizen.Wait(2000)
-    TriggerClientEvent('chat:addSuggestions', source, commandSuggestions)
+    whitelistData.getEntry = function(identifier)
+        if identifier == nil then return nil end
+
+        local userid = GetUserId(identifier)
+
+        if _whitelist[userid] then
+            return _whitelist[userid].GetEntry()
+        else
+            return nil
+        end
+    end
+
+    whitelistData.getEntries = function()
+        return _whitelist
+    end
+
+    cb(whitelistData)
 end)

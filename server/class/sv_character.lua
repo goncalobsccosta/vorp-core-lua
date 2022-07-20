@@ -1,5 +1,7 @@
 --Class for user characters
-function Character(source, identifier, charIdentifier, group, job, jobgrade, firstname, lastname, inventory, status, coords, money, gold, rol, xp, isdead, skin, comps)
+function Character(source, identifier, charIdentifier, group, job, jobgrade, firstname, lastname, inventory, status,
+                   coords, money, gold, rol, healthOuter, healthInner, staminaOuter, staminaInner, xp, hours, isdead, skin,
+                   comps)
     local self = {}
 
     self.identifier = identifier
@@ -14,12 +16,15 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
     self.coords = coords
     self.skin = skin
     self.comps = comps
-
     self.money = money
     self.gold = gold
     self.rol = rol
-
+    self.healthOuter = healthOuter
+    self.healthInner = healthInner
+    self.staminaOuter = staminaOuter
+    self.staminaInner = staminaInner
     self.xp = xp
+    self.hours = hours
 
     self.isdead = isdead
 
@@ -46,22 +51,29 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
     self.Money = function(value) if value ~= nil then self.money = value end return self.money end
     self.Gold = function(value) if value ~= nil then self.gold = value end return self.gold end
     self.Rol = function(value) if value ~= nil then self.rol = value end return self.rol end
+    self.HealthOuter = function(value) if value ~= nil then self.healthOuter = value end return self.healthOuter end
+    self.HealthInner = function(value) if value ~= nil then self.healthInner = value end return self.healthInner end
+    self.StaminaOuter = function(value) if value ~= nil then self.staminaOuter = value end return self.staminaOuter end
+    self.StaminaInner = function(value) if value ~= nil then self.staminaInner = value end return self.staminaInner end
     self.Xp = function(value) if value ~= nil then self.xp = value end return self.xp end
+    self.Hours = function(value) if value ~= nil then self.hours = value end return self.hours end
     self.IsDead = function(value) if value ~= nil then self.isdead = value end return self.isdead end
 
     self.Skin = function(value)
         if value ~= nil then
             self.skin = value
-            exports.ghmattimysql:execute("UPDATE characters SET `skinPlayer` = ? WHERE `identifier` = ? AND `charidentifier` = ?", {value, self.Identifier(), self.CharIdentifier()})
+            exports.ghmattimysql:execute("UPDATE characters SET `skinPlayer` = ? WHERE `identifier` = ? AND `charidentifier` = ?"
+                , { value, self.Identifier(), self.CharIdentifier() })
         end
 
         return self.skin
     end
-    
+
     self.Comps = function(value)
         if value ~= nil then
             self.comps = value
-            exports.ghmattimysql:execute("UPDATE characters SET `compPlayer` = ? WHERE `identifier` = ? AND `charidentifier` = ?", {value, self.Identifier(), self.CharIdentifier()})
+            exports.ghmattimysql:execute("UPDATE characters SET `compPlayer` = ? WHERE `identifier` = ? AND `charidentifier` = ?"
+                , { value, self.Identifier(), self.CharIdentifier() })
         end
 
         return self.comps
@@ -80,6 +92,11 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
         userData.gold = self.gold
         userData.rol = self.rol
         userData.xp = self.xp
+        userData.healthOuter = self.healthOuter
+        userData.healthInner = self.healthInner
+        userData.staminaOuter = self.staminaOuter
+        userData.staminaInner = self.staminaInner
+        userData.hours = self.hours
         userData.firstname = self.firstname
         userData.lastname = self.lastname
         userData.inventory = self.inventory
@@ -103,6 +120,10 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
 
         userData.setJob = function(job)
             self.Job(job)
+        end
+
+        self.setJobGrade = function(jobgrade)
+            self.Jobgrade(jobgrade)
         end
 
         userData.setMoney = function(money)
@@ -159,7 +180,7 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
 
         userData.updateCharUi = function()
             local nuipost = {}
-    
+
             nuipost["type"] = "ui"
             nuipost["action"] = "update"
             nuipost["moneyquanty"] = self.Money()
@@ -167,7 +188,7 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
             nuipost["rolquanty"] = self.Rol()
             nuipost["serverId"] = self.source
             nuipost["xp"] = self.Xp()
-    
+
             TriggerClientEvent("vorp:updateUi", self.source, json.encode(nuipost))
         end
 
@@ -220,6 +241,12 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
         self.updateCharUi()
     end
 
+    self.saveHealthAndStamina = function(healthOuter, healthInner, staminaOuter, staminaInner)
+        self.healthOuter = healthOuter
+        self.healthInner = healthInner
+        self.staminaOuter = staminaOuter
+        self.staminaInner = staminaInner
+    end
 
     self.setJob = function(newjob)
         self.Job(newjob)
@@ -233,25 +260,39 @@ function Character(source, identifier, charIdentifier, group, job, jobgrade, fir
         self.IsDead(dead)
     end
 
+    self.UpdateHours = function(hours)
+        self.hours = self.hours + hours
+    end
+
     self.SaveNewCharacterInDb = function(cb)
-        exports.ghmattimysql:execute("INSERT INTO characters(`identifier`,`group`,`money`,`gold`,`rol`,`xp`,`inventory`,`job`,`status`,`firstname`,`lastname`,`skinPlayer`,`compPlayer`,`jobgrade`,`coords`,`isdead`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", {self.Identifier(), self.Group(), self.Money(), self.Gold(), self.Rol(), self.Xp(), self.Inventory(), self.Job(), self.Status(), self.Firstname(), self.Lastname(), self.Skin(), self.Comps(), self.Jobgrade(), self.Coords(), self.IsDead()}, function(character)
+        exports.ghmattimysql:execute("INSERT INTO characters(`identifier`,`group`,`money`,`gold`,`rol`,`xp`,`healthouter`,`healthinner`,`staminaouter`,`staminainner`,`hours`,`inventory`,`job`,`status`,`firstname`,`lastname`,`skinPlayer`,`compPlayer`,`jobgrade`,`coords`,`isdead`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+            ,
+            { self.Identifier(), self.Group(), self.Money(), self.Gold(), self.Rol(), self.Xp(), self.HealthOuter(),
+                self.HealthInner(), self.StaminaOuter(), self.StaminaInner(), self.Hours(), self.Inventory(), self.Job(), self.Status(),
+                self.Firstname(), self.Lastname(), self.Skin(), self.Comps(), self.Jobgrade(), self.Coords(),
+                self.IsDead() }, function(character)
             cb(character.insertId)
         end)
     end
 
     self.DeleteCharacter = function()
-        exports.ghmattimysql:execute("DELETE FROM characters WHERE `identifier` = ? AND `charidentifier` = ? ", {self.Identifier(), self.CharIdentifier()})
+        exports.ghmattimysql:execute("DELETE FROM characters WHERE `identifier` = ? AND `charidentifier` = ? ",
+            { self.Identifier(), self.CharIdentifier() })
     end
 
     self.SaveCharacterCoords = function(coords)
         self.Coords(coords)
-        exports.ghmattimysql:execute("UPDATE characters SET `coords` = ? WHERE `identifier` = ? AND `charidentifier` = ?", {self.Coords(), self.Identifier(), self.CharIdentifier()})
+        exports.ghmattimysql:execute("UPDATE characters SET `coords` = ? WHERE `identifier` = ? AND `charidentifier` = ?"
+            , { self.Coords(), self.Identifier(), self.CharIdentifier() })
     end
 
     self.SaveCharacterInDb = function()
-        exports.ghmattimysql:execute("UPDATE characters SET `group` = ?,`money` = ?,`gold` = ?,`rol` = ?,`xp` = ?,`job` = ?, `status` = ?,`firstname` = ?, `lastname` = ?, `jobgrade` = ?,`coords` = ?,`isdead` = ? WHERE `identifier` = ? AND `charidentifier` = ?", {self.Group(), self.Money(), self.Gold(), self.Rol(), self.Xp(), self.Job(), self.Status(), self.Firstname(), self.Lastname(), self.Jobgrade(), self.Coords(), self.IsDead(), self.Identifier(), self.CharIdentifier()})
+        exports.ghmattimysql:execute("UPDATE characters SET `group` = ?,`money` = ?,`gold` = ?,`rol` = ?,`xp` = ?,`healthouter` = ?,`healthinner` = ?,`staminaouter` = ?,`staminainner` = ?,`hours` = ?,`job` = ?, `status` = ?,`firstname` = ?, `lastname` = ?, `jobgrade` = ?,`coords` = ?,`isdead` = ? WHERE `identifier` = ? AND `charidentifier` = ?"
+            ,
+            { self.Group(), self.Money(), self.Gold(), self.Rol(), self.Xp(), self.HealthOuter(), self.HealthInner(),
+                self.StaminaOuter(), self.StaminaInner(), self.Hours(), self.Job(), self.Status(), self.Firstname(), self.Lastname(),
+                self.Jobgrade(), self.Coords(), self.IsDead(), tostring(self.Identifier()), self.CharIdentifier() })
     end
 
     return self
 end
-
