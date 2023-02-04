@@ -1,19 +1,20 @@
-local whitelist, whitelistActive = {}, Config.Whitelist
+_whitelist = {}
 
-function AddUserToWhitelist(identifier)
-    whitelist[identifier] = true
+
+function AddUserToWhitelistById(id)
+    _whitelist[id].GetEntry().setStatus(true)
 end
 
-function RemoveUserFromWhitelist(identifier)
-    whitelist[identifier] = nil
+function RemoveUserFromWhitelistById(id)
+    _whitelist[id].GetEntry().setStatus(false)
 end
 
 local function LoadWhitelist()
-    Citizen.Wait(5000)
-    exports.ghmattimysql:execute('SELECT * FROM whitelist', {}, function(result)
+    Wait(5000)
+    MySQL.query('SELECT * FROM whitelist', {}, function(result)
         if #result > 0 then
-            for k,v in ipairs(result) do
-                whitelist[v.identifier] = true
+            for _, v in ipairs(result) do
+                _whitelist[v.id] = Whitelist(v.id, v.identifier, v.status, v.firstconnection)
             end
         end
     end)
@@ -21,12 +22,12 @@ end
 
 local function SetUpdateWhitelistPolicy()
     while Config.AllowWhitelistAutoUpdate do
-        Citizen.Wait(600000)
-        whitelist = {}
-        exports.ghmattimysql:execute("SELECT * FROM whitelist", {}, function(result)
+        Wait(3600000) --change this value if you want to have update from SQL not every 1 hour
+        _whitelist = {}
+        MySQL.query("SELECT * FROM whitelist", {}, function(result)
             if #result > 0 then
-                for k,v in ipairs(result) do
-                    whitelist[v.identifier] = true
+                for _, v in ipairs(result) do
+                    _whitelist[v.id] = Whitelist(v.id, v.identifier, v.status, v.firstconnection)
                 end
             end
         end)
@@ -34,81 +35,137 @@ local function SetUpdateWhitelistPolicy()
 end
 
 function GetSteamID(src)
-	local sid = GetPlayerIdentifiers(src)[1] or false
+    local sid = GetPlayerIdentifiers(src)[1] or false
 
-	if (sid == false or sid:sub(1,5) ~= "steam") then
-		return false
-	end
-
-	return sid
+    if sid == false or sid:sub(1, 5) ~= "steam" then
+        return false
+    end
+    return sid
 end
 
-function GetLicenseID(src)
-	local sid = GetPlayerIdentifiers(src)[2] or false
+---comment
+---@param source number
+---@param id_type string
+---@return nil | number
+local function GetIdentifier(source, id_type)
+    if type(id_type) ~= "string" then return print('Invalid usage') end
 
-	if (sid == false or sid:sub(1,5) ~= "license") then
-		return false
-	end
-
-	return sid
+    for _, identifier in pairs(GetPlayerIdentifiers(source)) do
+        if string.find(identifier, id_type) then
+            return identifier
+        end
+    end
+    return nil
 end
 
-Citizen.CreateThread(function()
+---comment
+---@param src number
+---@return boolean
+local function GetLicenseID(src)
+    local sid = GetPlayerIdentifiers(src)[2] or false
+    if (sid == false or sid:sub(1, 5) ~= "license") then
+        return false
+    end
+    return sid
+end
+
+---comment
+---@param identifier any
+---@return any
+function GetUserId(identifier)
+    for k, v in pairs(_whitelist) do
+        if v.GetEntry().getIdentifier() == identifier then
+            return v.GetEntry().getId()
+        end
+    end
+end
+
+---comment
+---@param identifier any
+---@return number
+local function InsertIntoWhitelist(identifier)
+    if GetUserId(identifier) then
+        return GetUserId(identifier)
+    end
+
+    MySQL.prepare.await("INSERT INTO whitelist (identifier, status, firstconnection) VALUES (?,?,?)"
+        , { identifier, false, true }, function(result) end)
+
+    local entryList = MySQL.single.await('SELECT 1 FROM whitelist WHERE identifier = ?', { identifier })
+    local currentFreeId
+    if entryList then
+        local entry = entryList
+        currentFreeId = entry.id
+    end
+    _whitelist[currentFreeId] = Whitelist(currentFreeId, identifier, false, true)
+
+    return currentFreeId
+end
+
+CreateThread(function()
     LoadWhitelist()
     SetUpdateWhitelistPolicy()
 end)
 
 AddEventHandler("playerConnecting", function(playerName, setKickReason, deferrals)
-    local source, userEntering = source, false
+    local _source = source
+    local userEntering = false
 
     deferrals.defer()
+    local steamIdentifier = GetSteamID(_source)
+    local playerWlId = nil
+    local IDs = GetIdentifier(_source, 'steam')
 
-    local steamIdentifier = GetSteamID(source)
-
-    if not steamIdentifier then
-        deferrals.done(Config.Langs["NoSteam"])
-        setKickReason(Config.Langs["NoSteam"])
+    if IDs == nil then
+        deferrals.done(Config.Langs.NoSteam)
+        userEntering = false
+        CancelEvent()
+        return
     end
 
-    if _users[steamIdentifier] then --Save and delete
+    if _users[steamIdentifier] and not _usersLoading[identifier] then --Save and delete
         _users[steamIdentifier].SaveUser()
         _users[steamIdentifier] = nil
     end
 
-    if whitelistActive then
-        if whitelist[steamIdentifier] then
+    if Config.Whitelist then
+        playerWlId = GetUserId(steamIdentifier)
+        if _whitelist[playerWlId] and _whitelist[playerWlId].GetEntry().getStatus() then
             deferrals.done()
+            userEntering = true
         else
-            deferrals.done(Config.Langs["NoInWhitelist"])
-            setKickReason(Config.Langs["NoInWhitelist"])
+            playerWlId = InsertIntoWhitelist(steamIdentifier)
+            deferrals.done(Config.Langs.NoInWhitelist .. playerWlId)
+            setKickReason(Config.Langs.NoInWhitelist .. playerWlId)
         end
     else
         userEntering = true
     end
 
     if userEntering then
-        deferrals.update(Config.Langs["LoadingUser"])
-        if CheckConnected(steamIdentifier) then
-            deferrals.done(Config.Langs["IsConnected"])
-            setKickReason(Config.Langs["IsConnected"])
-        else
-            LoadUser(source, setKickReason, deferrals, steamIdentifier, GetLicenseID(source))
-        end
+        deferrals.update(Config.Langs.LoadingUser)
+        LoadUser(_source, setKickReason, deferrals, steamIdentifier, GetLicenseID(_source))
     end
 
-
-    
-    --Debug.WriteLine($"{playerName} is connecting with (Identifier: [{steamIdentifier}])");
-
-    exports.ghmattimysql:execute("SELECT * FROM characters WHERE identifier LIKE ?", { steamIdentifier }, function(result)
-        if #result ~= 0 then
+    MySQL.single("SELECT 1 FROM characters WHERE `identifier` = ?", { steamIdentifier }, function(result)
+        if result then
             local inventory = "{}"
-            if not result[1].inventory == nil then
-                inventory = result[1].inventory
+            if not result.inventory == nil then
+                inventory = result.inventory
             end
-            LoadCharacter(steamIdentifier, Character(source, steamIdentifier, result[1].charidentifier, result[1].group, result[1].job, result[1].jobgrade, result[1].firstname, result[1].lastname, inventory, result[1].status, result[1].coords, result[1].money, result[1].gold, result[1].rol, result[1].xp, result[1].isdead))
+            LoadCharacter(steamIdentifier,
+                Character(_source, steamIdentifier, result.charidentifier, result.group, result.job,
+                    result.jobgrade, result.firstname, result.lastname, inventory, result.status,
+                    result.coords, result.money, result.gold, result.rol, result.healthouter,
+                    result.healthinner, result.staminaouter, result.staminainner, result.xp,
+                    result.hours, result.isdead
+                )
+            )
         end
     end)
-
+    local getPlayer = GetPlayerName(_source)
+    if getPlayer and Config.PrintPlayerInfoOnEnter then
+        print("Player ^2" .. getPlayer .. " ^7steam: ^3" .. steamIdentifier .. "^7 Loading...")
+    end
     --When player is fully connected then load!!!!
 end)

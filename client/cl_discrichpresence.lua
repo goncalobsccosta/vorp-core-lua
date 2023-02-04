@@ -1,22 +1,36 @@
-local drp_active = Config["ActiveDRP"]
---[[
-//public DiscRichPresence()
-//{
-//    Tick += setPresence;
-//}
+--==================================== EVENTS ==============================================--
+local playercount
 
-//[Tick]
-//public async Task setPresence()
-//{
-//    await Delay(60000);
-//    if (drp_active)
-//    {
-//        //Debug.WriteLine(GetConfig.Config["DiscordAppId"].ToString());
-//        //SetDiscordAppId(GetConfig.Config["DiscordAppId"].ToString());
-//        //SetRichPresence(GetConfig.Config["RichPresenceText"].ToString());
-//        //SetDiscordRichPresenceAsset(GetConfig.Config["DiscordRichPresenceAsset"].ToString());
-//        //SetDiscordRichPresenceAssetText(GetConfig.Config["DiscordRichPresenceAssetText"].ToString());
-//        //SetDiscordRichPresenceAssetSmall(GetConfig.Config["DiscordRichPresenceAssetSmall"].ToString());
-//        //SetDiscordRichPresenceAssetSmallText(GetConfig.Config["DiscordRichPresenceAssetSmallText"].ToString());
-//    }
-//}]]
+RegisterNetEvent("vorprich:update")
+AddEventHandler("vorprich:update", function(data)
+    playercount = data
+end)
+
+--======================================= THREADS ==========================================--
+
+CreateThread(function()
+    while true do
+        SetDiscordAppId(Config.appid)
+        SetDiscordRichPresenceAsset(Config.biglogo)
+        SetDiscordRichPresenceAssetText(Config.biglogodesc)
+        SetDiscordRichPresenceAssetSmall(Config.smalllogo)
+        SetDiscordRichPresenceAssetSmallText(Config.smalllogodesc)
+        SetDiscordRichPresenceAction(0, Config.richpresencebutton, Config.discordlink)
+        TriggerServerEvent("vorprich:getplayers")
+
+        while playercount == nil do
+            Wait(500)
+        end
+        if Config.shownameandid then
+            local pId = GetPlayerServerId(PlayerId())
+            local pName = GetPlayerName(PlayerId())
+            SetRichPresence(playercount .. "/" .. Config.maxplayers .. " - ID: " .. pId .. " | " .. pName)
+        else
+            SetRichPresence(playercount .. "/" .. Config.maxplayers)
+        end
+        Wait(60000) -- 1 min update
+        playercount = nil
+    end
+end)
+
+--==================================================================================================
