@@ -22,7 +22,7 @@ AddEventHandler('vorp:NotifyLeft', function(firsttext, secondtext, dict, icon, d
     LoadTexture(_dict)
 
     exports.vorp_core:DisplayLeftNotification(tostring(firsttext), tostring(secondtext), tostring(_dict), tostring(_icon)
-        , tonumber(duration), tostring(_color))
+    , tonumber(duration), tostring(_color))
 end)
 
 AddEventHandler('vorp:Tip', function(text, duration)
@@ -45,16 +45,16 @@ AddEventHandler('vorp:ShowTopNotification', function(tittle, subtitle, duration)
     exports.vorp_core:ShowTopNotification(tostring(tittle), tostring(subtitle), tonumber(duration))
 end)
 
-AddEventHandler('vorp:ShowAdvancedRightNotification', function(text, dict, icon, text_color, duration)
-    local _dict = dict
-    local _icon = icon
-    if not LoadTexture(_dict) then
-        _dict = "generic_textures"
-        LoadTexture(_dict)
-        _icon = "tick"
-    end
-    exports.vorp_core:ShowAdvancedRightNotification(tostring(text), tostring(_dict), tostring(_icon),
-        tostring(text_color), tonumber(duration))
+---comment
+---@param text string
+---@param dict string
+---@param icon string
+---@param text_color string
+---@param duration number
+---@param quality boolean
+AddEventHandler('vorp:ShowAdvancedRightNotification', function(text, dict, icon, text_color, duration, quality)
+    exports.vorp_core:ShowAdvancedRightNotification(tostring(text), tostring(dict), tostring(icon),
+        tostring(text_color), tonumber(duration), quality)
 end)
 
 AddEventHandler('vorp:ShowBasicTopNotification', function(text, duration)

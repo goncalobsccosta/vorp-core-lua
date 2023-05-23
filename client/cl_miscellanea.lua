@@ -1,3 +1,5 @@
+local T = Translation[Lang].MessageOfSystem
+
 --=================================== FUNCTIONS ======================================--
 
 ---comment
@@ -91,7 +93,7 @@ CreateThread(function()
         Wait(400)
         for _, playersid in ipairs(GetActivePlayers()) do
             local ped = GetPlayerPed(playersid)
-            SetPedPromptName(ped, Config.Langs.message4 .. tostring(GetPlayerServerId(playersid)))
+            SetPedPromptName(ped, T.message4 .. tostring(GetPlayerServerId(playersid)))
         end
     end
 end)
@@ -122,14 +124,6 @@ CreateThread(function()
     end
 end)
 
---CHECK FOR DESCONNECTING
-RegisterNetEvent('playerSpawned', function()
-    Wait(1500)
-    TriggerServerEvent("vorp_antilag:initialize")
-end)
 
-RegisterNetEvent('vorp_antilag:verify', function()
-    TriggerServerEvent("vorp_antilag:setLagCheck")
-end)
 
 --================================================================================================--

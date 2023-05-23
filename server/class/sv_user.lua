@@ -175,7 +175,8 @@ function User(source, identifier, group, playerwarnings, license, char)
 
     self.addCharacter = function(firstname, lastname, skin, comps)
         local newChar = Character(self.source, self._identifier, -1, Config.initGroup, Config.initJob,
-            Config.initJobGrade, firstname, lastname, "{}", "{}", "{}", Config.initMoney, Config.initGold, Config.initRol
+            Config.initJobGrade, firstname, lastname, "{}", "{}", "{}", Config.initMoney, Config.initGold,
+            Config.initRol
             , 500, 100, 500, 100, Config.initXp, 0, false, skin, comps)
 
         newChar.SaveNewCharacterInDb(function(id)
@@ -189,7 +190,6 @@ function User(source, identifier, group, playerwarnings, license, char)
         if self._usercharacters[charIdentifier] then
             self._usercharacters[charIdentifier].DeleteCharacter()
             self._usercharacters[charIdentifier] = nil
-
         end
     end
 
@@ -207,8 +207,32 @@ function User(source, identifier, group, playerwarnings, license, char)
         end
     end
 
-    self.SaveUser = function()
+    self.SaveUser = function(coords, heading)
         if self.usedCharacterId and self._usercharacters[self.usedCharacterId] then
+            if Config.onesync then
+                if coords then
+                    local characterCoords = json.encode({
+                        x = coords.x,
+                        y = coords.y,
+                        z = coords.z,
+                        heading = heading
+                    })
+                    self._usercharacters[self.usedCharacterId].Coords(characterCoords)
+                else
+                    local player = self.source
+                    local ped = GetPlayerPed(player)
+                    local Pcoords = GetEntityCoords(ped)
+                    local Pheading = GetEntityHeading(ped)
+
+                    local characterCoords = json.encode({
+                        x = Pcoords.x,
+                        y = Pcoords.y,
+                        z = Pcoords.z,
+                        heading = Pheading
+                    })
+                    self._usercharacters[self.usedCharacterId].Coords(characterCoords)
+                end
+            end
             self._usercharacters[self.usedCharacterId].SaveCharacterInDb()
         end
     end
