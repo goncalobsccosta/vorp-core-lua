@@ -1709,6 +1709,17 @@ Translation = {
                 name = "Id",
                 name1 = "Waffenname",
             },
+            delMoney = {
+                custom = "\n**Spieler-ID** `%d` \n**Typ** `%d`\n**Menge** `%d`",
+                title = "📋` /delmoney-Befehl`",
+                label = "VORPcore Befehl um Geld zu entfernen",
+                help = 'Spieler-ID',
+                help1 = 'Typ 0 für Geld und 1 für Gold',
+                help2 = 'Menge',
+                name = "Id",
+                name1 = "Typ",
+                name2 = "Menge",
+            },
             addMoney = {
                 custom = "\n**PlayerID** `%d` \n**Typ** `%d`\n**Menge** `%d`",
                 title = "📋` /addmoney Befehl` ",
